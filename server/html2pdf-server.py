@@ -3,8 +3,8 @@ from flask import request
 from flask import send_file
 from flask import after_this_request
 import sys
-from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
 import json
 import base64
 import os
@@ -12,8 +12,20 @@ import os
 chromedriver_path = "/usr/local/bin/chromedriver"
 
 app = flask.Flask(__name__)
-app.config["DEBUG"] = True
+app.config["DEBUG"] = False
 
+def set_chrome_options() -> None:
+    """Sets chrome options for Selenium.
+    Chrome options for headless browser is enabled.
+    """
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_prefs = {}
+    chrome_options.experimental_options["prefs"] = chrome_prefs
+    chrome_prefs["profile.default_content_settings"] = {"images": 2}
+    return chrome_options
 
 def send_devtools(driver, cmd, params={}):
     resource = "/session/%s/chromium/send_command_and_get_result" % driver.session_id
@@ -25,11 +37,8 @@ def send_devtools(driver, cmd, params={}):
     return response.get('value')
 
 
-def get_pdf_from_html(html_content, chromedriver=chromedriver_path, print_options={}):
-    webdriver_options = Options()
-    webdriver_options.add_argument('--headless')
-    webdriver_options.add_argument('--disable-gpu')
-    driver = webdriver.Chrome(chromedriver, options=webdriver_options)
+def get_pdf_from_html(html_content, print_options={}):
+    driver = webdriver.Chrome(options=set_chrome_options())
 
     driver.get("data:text/html;charset=utf-8," + html_content)
 
@@ -47,8 +56,7 @@ def get_pdf_from_html(html_content, chromedriver=chromedriver_path, print_option
 
 
 def html2pdf(html):
-    result = get_pdf_from_html(
-        html, chromedriver=chromedriver_path)
+    result = get_pdf_from_html(html)
     return result
 
 
@@ -69,7 +77,7 @@ def render():
 
     # render html
     print("rendering "+filename+"...")
-    pdf = html2pdf(str(html), filename)
+    pdf = html2pdf(str(html))
     # store pdf file
     print("storing "+filename+"...")
     with open(filename, 'wb') as file:
@@ -89,4 +97,4 @@ def render():
     return send_file(filename)
 
 
-app.run()
+app.run(host='0.0.0.0')

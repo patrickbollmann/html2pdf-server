@@ -1,0 +1,8 @@
+version: '3.9'
+services:
+
+  html2pdf-server:
+    build: ./server
+    container_name: html2pdf-server
+    ports:
+      - 5100:5000
