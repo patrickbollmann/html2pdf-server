@@ -9,6 +9,8 @@ import json
 import base64
 import os
 
+chromedriver_path = "/usr/local/bin/chromedriver"
+
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
@@ -23,7 +25,7 @@ def send_devtools(driver, cmd, params={}):
     return response.get('value')
 
 
-def get_pdf_from_html(html_content, chromedriver='/usr/local/bin/chromedriver', print_options={}):
+def get_pdf_from_html(html_content, chromedriver=chromedriver_path, print_options={}):
     webdriver_options = Options()
     webdriver_options.add_argument('--headless')
     webdriver_options.add_argument('--disable-gpu')
@@ -44,15 +46,15 @@ def get_pdf_from_html(html_content, chromedriver='/usr/local/bin/chromedriver', 
     return base64.b64decode(result['data'])
 
 
-def html2pdf(html, filename):
+def html2pdf(html):
     result = get_pdf_from_html(
-        html, chromedriver='/usr/local/bin/chromedriver')
+        html, chromedriver=chromedriver_path)
     return result
 
 
 @app.route('/', methods=['GET'])
 def home():
-    return "<h1>HTML 2 PDF Server</h1><p>use post request to render your HTML into a pdf file. As Parameters you need to specify 'html' with the htnl string and 'filename' like invoice.pdf</p>"
+    return "<h1>HTML 2 PDF Server</h1><p>use post request at /render to render your HTML into a pdf file. As Parameters you need to specify 'html' with the htnl string and 'filename' like invoice.pdf</p>"
 
 
 @app.route('/render', methods=['POST'])
