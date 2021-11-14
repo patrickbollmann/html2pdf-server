@@ -2,14 +2,11 @@ import flask
 from flask import request
 from flask import send_file
 from flask import after_this_request
-import sys
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 import json
 import base64
 import os
-
-chromedriver_path = "/usr/local/bin/chromedriver"
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False
